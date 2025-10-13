@@ -279,7 +279,9 @@ int main(){
         string ciphertext = des_encrypt_cbc(plaintext, key, iv);
         
         system("CLS");
-        cout << "--- Hasil Enkripsi ---" << endl;
+        cout << "--- Hasil Enkripsi ---\n";
+        cout << "Kunci: " << key << endl;
+        cout << "IV: " << iv << endl;
         cout << "Plaintext Original : " << plaintext << endl;
         print_hex("Ciphertext (Hex) ", ciphertext);
         
@@ -302,6 +304,8 @@ int main(){
 
             system("CLS");
             cout << "--- Hasil Dekripsi ---" << endl;
+            cout << "Kunci: " << key << endl;
+            cout << "IV: " << iv << endl;
             print_hex("Ciphertext (Hex) ", ciphertext);
             cout << "Plaintext Didekripsi : " << decrypted_text << endl;
 
