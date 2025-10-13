@@ -3,7 +3,6 @@
 #include <string>
 #include <numeric>
 #include <algorithm>
-#include <stdexcept>
 #include <iomanip>
 using namespace std;
 
@@ -61,42 +60,36 @@ const vector<int> shifts_table = {1, 1, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 1
 
 // Bit Conversion and Operation
 
-vector<int> string_to_bits(const string& text) {
+vector<int> string_to_bits(const string& text){
     vector<int> bits;
     for(char c : text){
-        for(int i = 7; i >= 0; --i){
-            bits.push_back((c >> i) & 1);
-        }
+        for(int i = 7; i >= 0; --i) bits.push_back((c >> i) & 1);
     }
     return bits;
 }
 
-string bits_to_string(const vector<int>& bits) {
+string bits_to_string(const vector<int>& bits){
     string text = "";
     for(size_t i = 0; i < bits.size(); i += 8){
         int byte = 0;
-        for(int j = 0; j < 8; ++j){
-            byte = (byte << 1) | bits[i + j];
-        }
+        for(int j = 0; j < 8; ++j) byte = (byte << 1) | bits[i + j];
         text += static_cast<char>(byte);
     }
     return text;
 }
 
-string bits_to_hex(const vector<int>& bits) {
+string bits_to_hex(const vector<int>& bits){
     stringstream ss;
     ss << hex << setfill('0');
     for(size_t i = 0; i < bits.size(); i += 4){
         int nibble = 0;
-        for(int j = 0; j < 4; ++j){
-            nibble = (nibble << 1) | bits[i + j];
-        }
+        for(int j = 0; j < 4; ++j) nibble = (nibble << 1) | bits[i + j];
         ss << setw(1) << nibble;
     }
     return ss.str();
 }
 
-vector<int> int_to_bits(int n, int len) {
+vector<int> int_to_bits(int n, int len){
     vector<int> bits(len);
     for(int i = len - 1; i >= 0; --i){
         bits[i] = n & 1;
@@ -105,32 +98,27 @@ vector<int> int_to_bits(int n, int len) {
     return bits;
 }
 
-vector<int> xor_bits(const vector<int>& a, const vector<int>& b) {
+vector<int> xor_bits(const vector<int>& a, const vector<int>& b){
     vector<int> result;
-    for(size_t i = 0; i < a.size(); ++i){
-        result.push_back(a[i] ^ b[i]);
-    }
+    for(size_t i = 0; i < a.size(); ++i) result.push_back(a[i] ^ b[i]);
     return result;
 }
 
 // DES core implementation
 
-vector<int> permute(const vector<int>& block, const vector<int>& table) {
+vector<int> permute(const vector<int>& block, const vector<int>& table){
     vector<int> result;
-    for(int i : table){
-        result.push_back(block[i - 1]);
-    }
+    for(int i : table) result.push_back(block[i - 1]);
     return result;
 }
 
-vector<vector<int>> generate_round_keys(const vector<int>& key_bits) {
+vector<vector<int>> generate_round_keys(const vector<int>& key_bits){
     vector<int> key = permute(key_bits, PC_1);
     vector<int> C(key.begin(), key.begin() + 28);
     vector<int> D(key.begin() + 28, key.end());
 
     vector<vector<int>> round_keys;
     for(int shift : shifts_table){
-        // Left circular shift
         rotate(C.begin(), C.begin() + shift, C.end());
         rotate(D.begin(), D.begin() + shift, D.end());
 
@@ -142,7 +130,8 @@ vector<vector<int>> generate_round_keys(const vector<int>& key_bits) {
 }
 
 // Feistel function in one round
-vector<int> feistel_function(const vector<int>& right, const vector<int>& round_key) {
+
+vector<int> feistel_function(const vector<int>& right, const vector<int>& round_key){
     vector<int> right_expanded = permute(right, E);
     vector<int> xored = xor_bits(right_expanded, round_key);
     
@@ -159,11 +148,8 @@ vector<int> feistel_function(const vector<int>& right, const vector<int>& round_
 }
 
 // Main function to process one 64bit block
-vector<int> des_process_block(const vector<int>& block_bits, const vector<vector<int>>& round_keys) {
-    if(block_bits.size() != 64){
-        throw invalid_argument("Ukuran blok harus 64 bit.");
-    }
 
+vector<int> des_process_block(const vector<int>& block_bits, const vector<vector<int>>& round_keys){
     vector<int> permuted_block = permute(block_bits, IP);
     vector<int> left(permuted_block.begin(), permuted_block.begin() + 32);
     vector<int> right(permuted_block.begin() + 32, permuted_block.end());
@@ -182,31 +168,23 @@ vector<int> des_process_block(const vector<int>& block_bits, const vector<vector
 
 // Padding and CBC Operation
 
-string add_padding(const string& data) {
+string add_padding(const string& data){
     int block_size = 8;
     int padding_len = block_size - (data.length() % block_size);
-    if(padding_len == 0){
-        padding_len = block_size;
-    }
+    if(padding_len == 0) padding_len = block_size;
     string padded_data = data;
-    for(int i = 0; i < padding_len; ++i){
-        padded_data += static_cast<char>(padding_len);
-    }
+    for(int i = 0; i < padding_len; ++i) padded_data += static_cast<char>(padding_len);
     return padded_data;
 }
 
-string remove_padding(const string& data) {
-    if(data.empty()){
-        return "";
-    }
+string remove_padding(const string& data){
+    if(data.empty()) return "";
     int padding_len = static_cast<int>(data.back());
-    if(padding_len < 1 || padding_len > 8){
-        return data;
-    }
+    if(padding_len < 1 || padding_len > 8) return data;
     return data.substr(0, data.length() - padding_len);
 }
 
-string des_encrypt_cbc(const string& plaintext, const string& key, const string& iv) {
+string des_encrypt_cbc(const string& plaintext, const string& key, const string& iv){
     string padded_plaintext = add_padding(plaintext);
     vector<int> key_bits = string_to_bits(key);
     vector<int> iv_bits = string_to_bits(iv);
@@ -229,7 +207,7 @@ string des_encrypt_cbc(const string& plaintext, const string& key, const string&
     return ciphertext;
 }
 
-string des_decrypt_cbc(const string& ciphertext, const string& key, const string& iv) {
+string des_decrypt_cbc(const string& ciphertext, const string& key, const string& iv){
     vector<int> key_bits = string_to_bits(key);
     vector<int> iv_bits = string_to_bits(iv);
 
@@ -249,42 +227,31 @@ string des_decrypt_cbc(const string& ciphertext, const string& key, const string
         plaintext += bits_to_string(plaintext_block);
         previous_cipher_block = block_bits;
     }
-    
     return remove_padding(plaintext);
 }
 
 // Main function
 
-void print_hex(const string& label, const string& data) {
+void print_hex(const string& label, const string& data){
     cout << label << ": ";
-    for(unsigned char c : data){
-        cout << hex << setw(2) << setfill('0') << static_cast<int>(c);
-    }
+    for(unsigned char c : data) cout << hex << setw(2) << setfill('0') << static_cast<int>(c);
     cout << dec << endl;
 }
 
 
-int main() {
+int main(){
     string key, iv;
     
-    cout << "====================" << endl;
-    cout << "  Implementasi DES  " << endl;
-    cout << "====================" << endl;
-
     while(key.length() != 8){
         cout << "Masukkan Kunci (8 karakter): ";
         getline(cin, key);
-        if(key.length() != 8){
-            cout << "Error: Panjang kunci tidak valid." << endl;
-        }
+        if(key.length() != 8) cout << "Error: Panjang kunci tidak valid." << endl;
     }
 
     while(iv.length() != 8){
         cout << "Masukkan IV (8 karakter): ";
         getline(cin, iv);
-        if(iv.length() != 8){
-            cout << "Error: Panjang IV tidak valid." << endl;
-        }
+        if(iv.length() != 8) cout << "Error: Panjang IV tidak valid." << endl;
     }
     
     int choice;
@@ -328,10 +295,6 @@ int main() {
         }catch(const exception& e){
             cerr << "Error: Format Hex tidak valid. Pastikan panjangnya genap dan hanya berisi 0-9, a-f." << endl;
         }
-
-    }else{
-        cout << "Pilihan tidak valid." << endl;
-    }
-
+    }else cout << "Pilihan tidak valid." << endl;
     return 0;
 }
