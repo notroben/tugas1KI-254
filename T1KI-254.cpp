@@ -241,13 +241,16 @@ void print_hex(const string& label, const string& data){
 
 int main(){
     string key, iv;
+
+    system("CLS");
+    cout << "--- DES Enkripsi/Dekripsi ---\n";
     
     while(key.length() != 8){
         cout << "Masukkan Kunci (8 karakter): ";
         getline(cin, key);
         if(key.length() != 8) cout << "Error: Panjang kunci tidak valid." << endl;
     }
-
+    
     while(iv.length() != 8){
         cout << "Masukkan IV (8 karakter): ";
         getline(cin, iv);
@@ -255,27 +258,36 @@ int main(){
     }
     
     int choice;
-    cout << "\nPilih operasi:" << endl;
+    system("CLS");
+    cout << "--- DES Enkripsi/Dekripsi ---\n";
+    cout << "Kunci: " << key;
+    cout << "\nIV: " << iv;
+    cout << "\n\nPilih operasi:" << endl;
     cout << "1. Enkripsi" << endl;
     cout << "2. Dekripsi" << endl;
-    cout << "Pilihan: ";
+    cout << "Pilihan(1/2): ";
     cin >> choice;
     cin.ignore();
 
     if(choice == 1){
         string plaintext;
-        cout << "\nMasukkan Plaintext: ";
+        system("CLS");
+        cout << "--- Enkripsi ---\n";
+        cout << "Masukkan Plaintext: ";
         getline(cin, plaintext);
 
         string ciphertext = des_encrypt_cbc(plaintext, key, iv);
         
-        cout << "\n--- Hasil Enkripsi ---" << endl;
+        system("CLS");
+        cout << "--- Hasil Enkripsi ---" << endl;
         cout << "Plaintext Original : " << plaintext << endl;
         print_hex("Ciphertext (Hex) ", ciphertext);
         
     }else if(choice == 2){
         string hex_ciphertext_str;
-        cout << "\nMasukkan Ciphertext (dalam format Hex): ";
+        system("CLS");
+        cout << "--- Dekripsi ---\n";
+        cout << "Masukkan Ciphertext (dalam format Hex): ";
         getline(cin, hex_ciphertext_str);
 
         string ciphertext = "";
@@ -288,8 +300,9 @@ int main(){
         
             string decrypted_text = des_decrypt_cbc(ciphertext, key, iv);
 
-            cout << "\n--- Hasil Dekripsi ---" << endl;
-            print_hex("Ciphertext (Hex)     ", ciphertext);
+            system("CLS");
+            cout << "--- Hasil Dekripsi ---" << endl;
+            print_hex("Ciphertext (Hex) ", ciphertext);
             cout << "Plaintext Didekripsi : " << decrypted_text << endl;
 
         }catch(const exception& e){
